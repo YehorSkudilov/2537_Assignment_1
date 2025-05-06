@@ -36,7 +36,8 @@ var mongoStore = MongoStore.create({
 	mongoUrl: `${mongoURI}/sessions`,
 	crypto: {
 		secret: process.env.MONGODB_SESSION_SECRET
-	}
+	},
+    ttl: 60 * 60 // 1 hour in seconds
 });
 
 //Session
@@ -44,7 +45,10 @@ app.use(session({
     secret: process.env.NODE_SESSION_SECRET,
 	store: mongoStore,
 	saveUninitialized: false, 
-	resave: true
+	resave: true,
+    cookie: {
+        maxAge: 1000 * 60 * 60 // 1 hour in milliseconds
+    }
 }));
 
 // Middleware
@@ -127,7 +131,7 @@ app.post('/signup', async (req, res) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Insert new user
     await usersCollection.insertOne({
